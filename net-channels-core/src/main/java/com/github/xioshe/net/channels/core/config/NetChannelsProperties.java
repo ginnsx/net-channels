@@ -9,7 +9,7 @@ public class NetChannelsProperties {
     /**
      * AES 加密密钥
      */
-    private String encryptionKey = "default-key-12345";
+    private String encryptionKey = "1234567890abvdef";
 
     /**
      * QR 码最大数据容量

@@ -160,6 +160,7 @@ public class PerformanceTest {
                               接收处理时间: {} ms
                               数据压缩比率: {}
                               有效载荷比率: {}
+                              实际荷载比率: {}
                               二维码数量: {}
                               总传输大小: {} bytes
                               数据膨胀率: {}
@@ -170,6 +171,7 @@ public class PerformanceTest {
                 String.format("%.2f", result.assembleTimeMs),
                 String.format("%.2f", 1 - (double) result.totalDataSize / result.originalSize),
                 String.format("%.2f", (double) result.originalSize / result.totalPacketSize),
+                String.format("%.2f", (double) result.totalDataSize / result.totalPacketSize),
                 result.qrCodeCount,
                 result.totalPacketSize,
                 String.format("%.2f", (double) result.totalPacketSize / result.actualPacketSize),

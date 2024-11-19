@@ -5,7 +5,6 @@ import com.github.xioshe.net.channels.core.exception.CryptoException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * AES加密解密
@@ -22,24 +21,21 @@ public class AESCipher {
                 key.getBytes(StandardCharsets.UTF_8), ALGORITHM);
     }
 
-    public String encrypt(String data) {
+    public byte[] encrypt(byte[] data) {
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            // 直接转换为 String 可能导致乱码，所以需要 Base64 编码
-            return Base64.getEncoder().encodeToString(
-                    cipher.doFinal(data.getBytes()));
+            return cipher.doFinal(data);
         } catch (Exception e) {
             throw new CryptoException("Encryption failed", e);
         }
     }
 
-    public String decrypt(String encryptedData) {
+    public byte[] decrypt(byte[] encryptedData) {
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return new String(cipher.doFinal(
-                    Base64.getDecoder().decode(encryptedData)));
+            return cipher.doFinal(encryptedData);
         } catch (Exception e) {
             throw new CryptoException("Decryption failed", e);
         }

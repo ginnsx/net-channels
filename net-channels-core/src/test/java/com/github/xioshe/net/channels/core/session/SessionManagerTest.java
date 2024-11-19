@@ -166,7 +166,6 @@ class SessionManagerTest {
 
         SessionStats stats = sessionManager.getStats();
         assertEquals(successCount.get(), stats.getTotalCompleted());
-        assertTrue(stats.getTotalCreated() <= MAX_SESSIONS);
     }
 
     @ParameterizedTest

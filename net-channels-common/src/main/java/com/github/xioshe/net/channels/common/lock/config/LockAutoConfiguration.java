@@ -1,18 +1,18 @@
 package com.github.xioshe.net.channels.common.lock.config;
 
 import com.github.xioshe.net.channels.common.lock.aspect.LockAspect;
-import com.github.xioshe.net.channels.common.lock.core.RedisLockExecutor;
 import com.github.xioshe.net.channels.common.lock.core.LocalLockExecutor;
 import com.github.xioshe.net.channels.common.lock.core.LockExecutor;
+import com.github.xioshe.net.channels.common.lock.core.RedisLockExecutor;
 import com.github.xioshe.net.channels.common.lock.template.LockTemplate;
 import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(LockProperties.class)
 @ConditionalOnProperty(prefix = "app.lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class LockAutoConfiguration {

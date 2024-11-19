@@ -1,12 +1,10 @@
-package com.github.xioshe.net.channels.core.codec;
+package com.github.xioshe.net.channels.core.compress;
 
 import com.github.xioshe.net.channels.core.exception.NetChannelsException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -19,31 +17,29 @@ import java.util.zip.GZIPOutputStream;
 public class DataCompressor {
     private static final int BUFFER_SIZE = 8192; // 8KB buffer
 
-    public String compress(String data) {
-        if (data == null || data.isEmpty()) {
+    public byte[] compress(byte[] data) {
+        if (data == null || data.length == 0) {
             throw new NetChannelsException("Input data cannot be null or empty");
         }
 
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              GZIPOutputStream gzip = new GZIPOutputStream(bos)) {
-            gzip.write(data.getBytes(StandardCharsets.UTF_8));
+            gzip.write(data);
             gzip.finish(); // 关闭流，以写入剩余数据
-            return Base64.getEncoder().encodeToString(bos.toByteArray());
+            return bos.toByteArray();
         } catch (Exception e) {
             log.error("Failed to compress data", e);
             throw new NetChannelsException("Compression failed", e);
         }
     }
 
-    public String decompress(String compressedData) {
-        if (compressedData == null || compressedData.isEmpty()) {
+    public byte[] decompress(byte[] compressedData) {
+        if (compressedData == null || compressedData.length == 0) {
             throw new NetChannelsException("Compressed data cannot be null or empty");
         }
 
         try {
-            byte[] decoded = Base64.getDecoder().decode(compressedData);
-
-            try (ByteArrayInputStream bis = new ByteArrayInputStream(decoded);
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(compressedData);
                  GZIPInputStream gzipIn = new GZIPInputStream(bis);
                  ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
@@ -53,7 +49,7 @@ public class DataCompressor {
                     bos.write(buffer, 0, len);
                 }
 
-                return bos.toString(StandardCharsets.UTF_8);
+                return bos.toByteArray();
             }
         } catch (IllegalArgumentException e) {
             log.error("Invalid Base64 input", e);

@@ -1,6 +1,7 @@
 package com.github.xioshe.net.channels.core.transfer;
 
-import com.github.xioshe.net.channels.core.codec.DataCompressor;
+import com.github.xioshe.net.channels.core.cache.TransferDataCache;
+import com.github.xioshe.net.channels.core.compress.DataCompressor;
 import com.github.xioshe.net.channels.core.crypto.AESCipher;
 import com.github.xioshe.net.channels.core.exception.NetChannelsException;
 import com.github.xioshe.net.channels.core.protocol.QRCodeProtocol;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -60,13 +62,13 @@ class DataSplitterTest {
     @Test
     void shouldSplitDataSuccessfully() throws Exception {
         // given
-        String compressedData = "compressed-data";
-        String encryptedData = "encrypted-data";
-        when(compressor.compress(TEST_DATA)).thenReturn(compressedData);
+        var compressedData = "compressed-data".getBytes(StandardCharsets.UTF_8);
+        var encryptedData = "encrypted-data".getBytes(StandardCharsets.UTF_8);
+        when(compressor.compress(TEST_DATA.getBytes(StandardCharsets.UTF_8))).thenReturn(compressedData);
         when(cipher.encrypt(compressedData)).thenReturn(encryptedData);
         when(protocol.packetToQRCode(any())).thenReturn("qr-code-data");
         when(sessionManager.createSession(anyString(), anyInt(), anyInt()))
-                .thenReturn(new TransferSession(TEST_SESSION_ID, 1, encryptedData.length()));
+                .thenReturn(new TransferSession(TEST_SESSION_ID, 1, encryptedData.length));
 
         // when
         List<String> result = splitter.split(TEST_DATA, TEST_SESSION_ID);
@@ -74,7 +76,7 @@ class DataSplitterTest {
         // then
         assertThat(result).isNotEmpty();
         verify(dataCache).store(eq(TEST_SESSION_ID), anyList());
-        verify(sessionManager).createSession(TEST_SESSION_ID, 1, encryptedData.length());
+        verify(sessionManager).createSession(TEST_SESSION_ID, 1, encryptedData.length);
     }
 
     @Test
@@ -129,13 +131,4 @@ class DataSplitterTest {
 //                .isInstanceOf(NetChannelsException.class)
 //                .hasMessageContaining("Packet size exceeds QR code capacity");
 //    }
-
-    @Test
-    void shouldCleanupSuccessfully() {
-        // when
-        splitter.cleanup(TEST_SESSION_ID);
-
-        // then
-        verify(dataCache).remove(TEST_SESSION_ID);
-    }
 }

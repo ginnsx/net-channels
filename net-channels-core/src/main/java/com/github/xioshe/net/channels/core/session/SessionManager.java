@@ -114,7 +114,7 @@ public class SessionManager {
         }
     }
 
-    private void markSessionFailed(TransferSession session, Exception cause) {
+    private void markSessionFailed(TransferSession session, Throwable cause) {
         if (session.getState() != SessionState.FAILED) {
             session.setState(SessionState.FAILED);
             totalSessionsFailed.incrementAndGet();
@@ -177,7 +177,7 @@ public class SessionManager {
         }
     }
 
-    public void markSessionFailed(String sessionId, Exception e) {
+    public void markSessionFailed(String sessionId, Throwable e) {
         TransferSession session = getSession(sessionId);
         markSessionFailed(session, e);
     }

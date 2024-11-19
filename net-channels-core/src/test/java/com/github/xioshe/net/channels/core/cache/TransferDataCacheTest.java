@@ -1,38 +1,23 @@
-package com.github.xioshe.net.channels.core.transfer;
+package com.github.xioshe.net.channels.core.cache;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringJUnitConfig(classes = {TransferDataCacheTest.TestConfig.class})
+@SpringBootTest
 class TransferDataCacheTest {
-
-    @Configuration
-    @EnableCaching
-    static class TestConfig {
-        @Bean
-        public CacheManager cacheManager() {
-            return new ConcurrentMapCacheManager("qrcodes");
-        }
-
-        @Bean
-        public TransferDataCache<String> transferDataCache() {
-            return new TransferDataCache<>();
-        }
-    }
 
     @Autowired
     private TransferDataCache<String> cache;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     private static final String TEST_KEY = "test-session-1";
     private static final String TEST_DATA = "test-data-content";
@@ -102,5 +87,20 @@ class TransferDataCacheTest {
         assertThat(retrieved)
                 .isPresent()
                 .contains(newData);
+    }
+
+    @Test
+    void shouldWorkWithSpringCache() {
+        // when
+        var retrieved = cache.get(TEST_KEY, () -> TEST_DATA);
+
+        // then
+        assertThat(retrieved)
+                .contains(TEST_DATA);
+
+        // verify it's actually in Redis
+        assertThat(cacheManager.getCache("test:packets"))
+                .isNotNull()
+                .satisfies(c -> assertThat(c.get(TEST_KEY)).isNotNull());
     }
 }

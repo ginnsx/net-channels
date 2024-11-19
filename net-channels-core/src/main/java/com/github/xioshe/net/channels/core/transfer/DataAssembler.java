@@ -1,7 +1,8 @@
 package com.github.xioshe.net.channels.core.transfer;
 
 import com.github.xioshe.net.channels.common.lock.template.LockTemplate;
-import com.github.xioshe.net.channels.core.codec.DataCompressor;
+import com.github.xioshe.net.channels.core.cache.TransferDataCache;
+import com.github.xioshe.net.channels.core.compress.DataCompressor;
 import com.github.xioshe.net.channels.core.crypto.AESCipher;
 import com.github.xioshe.net.channels.core.exception.NetChannelsException;
 import com.github.xioshe.net.channels.core.model.PacketHeader;
@@ -13,21 +14,23 @@ import com.github.xioshe.net.channels.core.session.TransferSession;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 @Builder
 public class DataAssembler {
-    private static final int RETRANSMIT_THRESHOLD = 5; // 5秒无新数据触发重传
     private final SessionManager sessionManager;
     private final QRCodeProtocol protocol;
     private final DataCompressor compressor;
     private final AESCipher cipher;
-    private final TransferDataCache<StringBuilder> dataCache;
+    private final TransferDataCache<ByteBufferDataBuffer> dataCache;
     private final LockTemplate lockTemplate;
 
 
-    public TransferResult tryAssemble(String qrCodeData) {
+    public TransferResult assemble(String qrCodeData) {
         TransferPacket packet = protocol.qrCodeToPacket(qrCodeData);
 
         if (!protocol.validatePacket(packet)) {
@@ -43,8 +46,8 @@ public class DataAssembler {
                     packetHeader.getTotalSize());
 
             // 在正确的位置插入数据
-            StringBuilder buffer = dataCache.get(sessionId,
-                    () -> new StringBuilder(packetHeader.getTotalSize()));
+            ByteBufferDataBuffer buffer = dataCache.get(sessionId,
+                    () -> new ByteBufferDataBuffer(packetHeader.getTotalSize()));
 
             lockTemplate.execute("nc:assembler:" + sessionId, () -> {
                 insertChunkData(buffer, packet);
@@ -77,30 +80,23 @@ public class DataAssembler {
         }
     }
 
-    private void insertChunkData(StringBuilder buffer, TransferPacket packet) {
+    private void insertChunkData(ByteBufferDataBuffer buffer, TransferPacket packet) {
         int position = packet.getHeader().getCurrentChunk() *
                        packet.getHeader().getChunkSize();
-
-        String data = packet.getData();
-
-        // 确保buffer有足够空间
-        if (buffer.length() < position + data.length()) {
-            buffer.setLength(position + data.length());
-        }
-        buffer.replace(position, position + data.length(), data);
+        buffer.insertChunk(position, packet.getData());
     }
 
-    private String assembleCompleteData(String sessionId, StringBuilder buffer) {
+    private String assembleCompleteData(String sessionId, ByteBufferDataBuffer buffer) {
         try {
-            String assembledData = buffer.toString();
+            byte[] assembledData = buffer.toByteArray();
             // 解密
-            String decryptedData = cipher.decrypt(assembledData);
+            byte[] decryptedData = cipher.decrypt(assembledData);
             // 解压
-            String decompressedData = compressor.decompress(decryptedData);
+            byte[] decompressedData = compressor.decompress(decryptedData);
 
             log.info("Successfully assembled data for session: {}", sessionId);
             cleanup(sessionId);
-            return decompressedData;
+            return new String(decompressedData, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new NetChannelsException("Failed to assemble data", e);
         }
@@ -112,6 +108,26 @@ public class DataAssembler {
             sessionManager.removeSession(sessionId);
         } catch (Exception e) {
             log.warn("Failed to remove session: {}", sessionId, e);
+        }
+    }
+
+    /**
+     * 使用 ByteBuffer 在组装数据时保存临时数据。如果数据量特别大，可以考虑使用 MappedByteBuffer。
+     */
+    public static class ByteBufferDataBuffer {
+        private final ByteBuffer buffer;
+
+        public ByteBufferDataBuffer(int totalSize) {
+            this.buffer = ByteBuffer.allocate(totalSize);
+        }
+
+        public synchronized void insertChunk(int position, byte[] data) {
+            buffer.position(position);
+            buffer.put(data);
+        }
+
+        public byte[] toByteArray() {
+            return Arrays.copyOf(buffer.array(), buffer.position());
         }
     }
 }

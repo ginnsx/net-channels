@@ -3,6 +3,8 @@ package com.github.xioshe.net.channels.core.crypto;
 import com.github.xioshe.net.channels.core.exception.CryptoException;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,18 +15,19 @@ class AESCipherTest {
 
     @Test
     void shouldEncryptAndDecryptSuccessfully() {
-        String originalData = "Hello, World!";
-        String encrypted = cipher.encrypt(originalData);
-        String decrypted = cipher.decrypt(encrypted);
+        String raw = "Hello, World!";
+        byte[] originalData = raw.getBytes(StandardCharsets.UTF_8);
+        byte[] encrypted = cipher.encrypt(originalData);
+        byte[] decrypted = cipher.decrypt(encrypted);
 
         assertNotEquals(originalData, encrypted);
-        assertEquals(originalData, decrypted);
+        assertEquals(raw, new String(decrypted, StandardCharsets.UTF_8));
     }
 
     @Test
     void shouldThrowExceptionOnInvalidKey() {
         assertThrows(CryptoException.class, () -> {
-            new AESCipher("short").encrypt("test");
+            new AESCipher("short").encrypt("test".getBytes(StandardCharsets.UTF_8));
         });
     }
 }

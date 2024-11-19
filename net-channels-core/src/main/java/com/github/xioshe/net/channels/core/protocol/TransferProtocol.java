@@ -17,7 +17,7 @@ public interface TransferProtocol {
     /**
      * 计算数据校验和
      */
-    String calculateChecksum(String data);
+    String calculateChecksum(byte[] data);
 
     /**
      * 验证数据包完整性

@@ -13,10 +13,12 @@ public class TransferResult {
     private double progress;
     private List<Integer> missingChunks;
     private String sessionId;
+    private String error;
 
     public enum TransferStatus {
         IN_PROGRESS,
-        COMPLETED
+        COMPLETED,
+        FAILED
     }
 
     public boolean isCompleted() {

@@ -16,10 +16,10 @@
     <description>net-channels</description>
 
     <modules>
+        <module>net-channels-common</module>
         <module>net-channels-core</module>
         <module>net-channels-external</module>
         <module>net-channels-internal</module>
-        <module>net-channels-common</module>
     </modules>
 
     <properties>
@@ -39,6 +39,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.xioshe</groupId>
+                <artifactId>net-channels-core</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -48,61 +53,20 @@
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-starter-web</artifactId>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-starter-webflux</artifactId>-->
-            <!--            </dependency>-->
-
-            <!--            <dependency>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-devtools</artifactId>-->
-            <!--                <scope>runtime</scope>-->
-            <!--                <optional>true</optional>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>org.projectlombok</groupId>-->
-            <!--                <artifactId>lombok</artifactId>-->
-            <!--                <optional>true</optional>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-starter-test</artifactId>-->
-            <!--                <scope>test</scope>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>io.projectreactor</groupId>-->
-            <!--                <artifactId>reactor-test</artifactId>-->
-            <!--                <scope>test</scope>-->
-            <!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>maven_central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-    </repositories>
-
 </project>

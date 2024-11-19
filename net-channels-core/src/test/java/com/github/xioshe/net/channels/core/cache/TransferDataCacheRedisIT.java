@@ -1,4 +1,4 @@
-package com.github.xioshe.net.channels.core.transfer;
+package com.github.xioshe.net.channels.core.cache;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ class TransferDataCacheRedisIT {
                 .contains(TEST_DATA);
 
         // verify it's actually in Redis
-        assertThat(cacheManager.getCache("qrcodes"))
+        assertThat(cacheManager.getCache("test:packets"))
                 .isNotNull()
                 .satisfies(c -> assertThat(c.get(TEST_KEY)).isNotNull());
     }

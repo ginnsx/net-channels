@@ -1,35 +1,32 @@
 package com.github.xioshe.net.channels.core.protocol;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.xioshe.net.channels.core.exception.NetChannelsException;
 import com.github.xioshe.net.channels.core.model.TransferPacket;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.PureJavaCrc32C;
 
+import java.util.Base64;
+
+/**
+ * 使用 MessagePack 进行序列化，以减小包大小
+ */
 @Slf4j
 public class QRCodeProtocol implements TransferProtocol {
     private static final int MAX_QR_DATA_SIZE = 2953; // QR 码最大容量
-    private final ObjectMapper objectMapper;
-
-    public QRCodeProtocol() {
-        this.objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true);
-    }
 
     @Override
     public String packetToQRCode(TransferPacket packet) {
         validatePacketBeforeConversion(packet);
         try {
-            String json = objectMapper.writeValueAsString(packet);
-            if (json.length() > MAX_QR_DATA_SIZE) {
+            byte[] bytes = packet.toBytes();
+            String result = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+            if (result.length() > MAX_QR_DATA_SIZE) {
                 throw new NetChannelsException(
                         String.format("Packet size %d exceeds maximum QR code capacity %d",
-                                json.length(), MAX_QR_DATA_SIZE));
+                                result.length(), MAX_QR_DATA_SIZE));
             }
-            return json;
-        } catch (Exception e) {
+            return result;
+        } catch (Throwable e) {
             log.error("Failed to serialize packet: {}", e.getMessage());
             throw new NetChannelsException("Failed to serialize packet", e);
         }
@@ -39,7 +36,8 @@ public class QRCodeProtocol implements TransferProtocol {
     public TransferPacket qrCodeToPacket(String qrCodeData) {
         validateQRCodeData(qrCodeData);
         try {
-            TransferPacket packet = objectMapper.readValue(qrCodeData, TransferPacket.class);
+            byte[] bytes = Base64.getUrlDecoder().decode(qrCodeData);
+            TransferPacket packet = TransferPacket.fromBytes(bytes);
             if (!validatePacket(packet)) {
                 throw new NetChannelsException("Packet validation failed");
             }
@@ -51,11 +49,14 @@ public class QRCodeProtocol implements TransferProtocol {
     }
 
     @Override
-    public String calculateChecksum(String data) {
+    public String calculateChecksum(byte[] data) {
         if (data == null) {
             throw new IllegalArgumentException("Data cannot be null");
         }
-        return DigestUtils.md5Hex(data);
+        // md5 32 bytes, crc32 only 8 bytes
+        PureJavaCrc32C crc32 = new PureJavaCrc32C();
+        crc32.update(data);
+        return String.format("%08x", crc32.getValue());
     }
 
     @Override

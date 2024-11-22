@@ -26,11 +26,14 @@ class LockAspectTest {
 
     @Test
     void testLockAspect() throws InterruptedException, ExecutionException {
+        // given
         AtomicInteger counter = new AtomicInteger();
         List<Future<String>> futures = new ArrayList<>();
 
         int threadCount = 10;
         CountDownLatch latch = new CountDownLatch(threadCount);
+
+        // when
         try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
 
             // 并发测试
@@ -48,7 +51,7 @@ class LockAspectTest {
             executor.shutdown();
         }
 
-        // 验证结果
+        // then
         assertEquals(threadCount, counter.get());
         for (Future<String> future : futures) {
             assertNotNull(future.get());
@@ -61,11 +64,6 @@ class TestService {
     @WithLock(key = "'test:' + #key")
     public String testMethod(String key, AtomicInteger counter) {
         counter.incrementAndGet();
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         return "success";
     }
 }

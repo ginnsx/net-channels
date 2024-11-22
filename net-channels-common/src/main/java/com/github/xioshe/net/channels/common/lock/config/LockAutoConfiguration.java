@@ -24,10 +24,10 @@ public class LockAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "app.lock", name = "type", havingValue = "DISTRIBUTED")
+    @ConditionalOnProperty(prefix = "app.lock", name = "type", havingValue = "REDIS")
     @ConditionalOnBean(RedissonClient.class)
-    public LockExecutor distributedLockExecutor(RedissonClient redissonClient) {
-        return new RedisLockExecutor(redissonClient);
+    public LockExecutor distributedLockExecutor(RedissonClient redissonClient, LockProperties lockProperties) {
+        return new RedisLockExecutor(redissonClient, lockProperties.getKeyStorePrefix());
     }
 
     @Bean

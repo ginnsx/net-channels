@@ -10,16 +10,10 @@ import java.util.concurrent.TimeUnit;
 public class LockInfo {
     private String key;
     private long waitTime;
+    /**
+     * 锁释放时间，对本地锁无效
+     */
     private long leaseTime;
     private TimeUnit timeUnit;
     private boolean fairLock;
-
-    public void handleKey(String prefix) {
-        if (prefix == null || prefix.isBlank()) {
-            return;
-        }
-        if (!key.startsWith(prefix)) {
-            this.key = prefix + key;
-        }
-    }
 }

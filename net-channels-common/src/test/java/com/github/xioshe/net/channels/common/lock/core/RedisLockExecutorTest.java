@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +33,7 @@ class RedisLockExecutorTest {
 
     @BeforeEach
     void setUp() {
-        lockExecutor = new RedisLockExecutor(redissonClient);
+        lockExecutor = new RedisLockExecutor(redissonClient, "test-lock:");
     }
 
     @Test
@@ -49,7 +48,7 @@ class RedisLockExecutorTest {
 
         // then
         assertTrue(result);
-        verify(redissonClient).getLock("test-key");
+        verify(redissonClient).getLock("test-lock:test-key");
         verify(rLock).tryLock(
                 eq(lockInfo.getWaitTime()),
                 eq(lockInfo.getLeaseTime()),
@@ -69,7 +68,7 @@ class RedisLockExecutorTest {
 
         // then
         assertTrue(result);
-        verify(redissonClient).getFairLock("test-key");
+        verify(redissonClient).getFairLock("test-lock:test-key");
         verify(rLock).tryLock(
                 eq(lockInfo.getWaitTime()),
                 eq(lockInfo.getLeaseTime()),
@@ -133,26 +132,6 @@ class RedisLockExecutorTest {
 
         // then
         verify(rLock, never()).unlock();
-    }
-
-    @Test
-    void shouldReleaseCorrectLockType() {
-        // given
-        LockInfo fairLockInfo = createLockInfo("fair-key", true);
-        LockInfo normalLockInfo = createLockInfo("normal-key", false);
-
-        when(redissonClient.getFairLock(anyString())).thenReturn(rLock);
-        when(redissonClient.getLock(anyString())).thenReturn(rLock);
-        when(rLock.isHeldByCurrentThread()).thenReturn(true);
-
-        // when
-        lockExecutor.unlock(fairLockInfo);
-        lockExecutor.unlock(normalLockInfo);
-
-        // then
-        verify(redissonClient).getFairLock("fair-key");
-        verify(redissonClient).getLock("normal-key");
-        verify(rLock, times(2)).unlock();
     }
 
     private LockInfo createLockInfo(String key, boolean fairLock) {

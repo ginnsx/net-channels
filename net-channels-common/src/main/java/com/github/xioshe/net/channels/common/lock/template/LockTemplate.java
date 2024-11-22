@@ -18,13 +18,6 @@ public class LockTemplate {
     private final LockProperties properties;
 
     /**
-     * 执行需要加锁的操作（有返回值）
-     */
-    public <T> T execute(String key, Supplier<T> supplier) {
-        return execute(createLockInfo(key), supplier);
-    }
-
-    /**
      * 执行需要加锁的操作（无返回值）
      */
     public void execute(String key, Runnable runnable) {
@@ -42,10 +35,16 @@ public class LockTemplate {
     }
 
     /**
+     * 执行需要加锁的操作（有返回值）
+     */
+    public <T> T execute(String key, Supplier<T> supplier) {
+        return execute(createLockInfo(key), supplier);
+    }
+
+    /**
      * 使用自定义的锁信息执行操作
      */
     public <T> T execute(LockInfo lockInfo, Supplier<T> supplier) {
-        lockInfo.handleKey(properties.getKeyPrefix());
         if (!lockExecutor.tryLock(lockInfo)) {
             throw new LockException("Failed to acquire lock: " + lockInfo.getKey());
         }

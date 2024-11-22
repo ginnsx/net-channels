@@ -13,14 +13,14 @@ public @interface WithLock {
      * 锁的key，支持SpEL表达式
      */
     String key();
-    
+
     /**
-     * 等待锁的时间，默认使用配置文件中的值。使用 Redisson 实现时，0 代表启用。自动续期
+     * 等待锁的时间，默认使用配置文件中的值。0 代表不等待
      */
     long waitTime() default -1;
     
     /**
-     * 持有锁的时间，默认使用配置文件中的值。0 代表不等待
+     * 持有锁的时间，默认使用配置文件中的值。使用 Redisson 实现锁时，0 代表启用自动续期
      */
     long leaseTime() default -1;
     

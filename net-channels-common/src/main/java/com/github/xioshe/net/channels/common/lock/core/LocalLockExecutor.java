@@ -44,12 +44,12 @@ public class LocalLockExecutor implements LockExecutor {
                 existingHolder.updateLastAccessTime();
                 return existingHolder;
             }
-            return new LockHolder(new ReentrantLock(lockInfo.isFairLock()), lockInfo.isFairLock());
+            return new LockHolder(new ReentrantLock(lockInfo.isFair()), lockInfo.isFair());
         });
         // 检查公平性设置是否一致，避免同一 key 申请了不同的公平性
-        if (strictFair && holder.isFair() != lockInfo.isFairLock()) {
+        if (strictFair && holder.isFair() != lockInfo.isFair()) {
             log.warn("Lock fairness setting mismatch for key: {}. Existing: {}, Requested: {}",
-                    lockInfo.getKey(), holder.isFair(), lockInfo.isFairLock());
+                    lockInfo.getKey(), holder.isFair(), lockInfo.isFair());
             return false;
         }
 

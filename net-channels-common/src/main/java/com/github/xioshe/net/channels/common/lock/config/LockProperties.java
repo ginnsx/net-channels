@@ -9,7 +9,7 @@ public class LockProperties {
     /**
      * 是否启用分布式锁
      */
-    private boolean enabled = true;
+    private boolean enabled = false;
     /**
      * 锁类型
      */
@@ -23,9 +23,9 @@ public class LockProperties {
      */
     private long leaseTime = 0;
     /**
-     * 是否使用公平锁
+     * 是否默认使用公平锁
      */
-    private boolean fairLock = false;
+    private boolean defaultFair = false;
 
     /**
      * 需要持久化时锁的 key 前缀

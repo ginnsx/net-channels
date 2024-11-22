@@ -15,5 +15,5 @@ public class LockInfo {
      */
     private long leaseTime;
     private TimeUnit timeUnit;
-    private boolean fairLock;
+    private boolean fair;
 }

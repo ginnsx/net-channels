@@ -32,5 +32,5 @@ public @interface WithLock {
     /**
      * 是否使用公平锁
      */
-    boolean fairLock() default false;
+    boolean fair() default false;
 }

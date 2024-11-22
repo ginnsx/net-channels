@@ -140,7 +140,7 @@ class RedisLockExecutorTest {
                 .waitTime(1000)
                 .leaseTime(5000)
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(fairLock)
+                .fair(fairLock)
                 .build();
     }
 }

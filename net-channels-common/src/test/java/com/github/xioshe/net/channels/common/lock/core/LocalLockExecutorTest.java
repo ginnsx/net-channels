@@ -16,7 +16,7 @@ class LocalLockExecutorTest extends LockExecutorContractTest {
                 .waitTime(0) // 不等待
                 .leaseTime(1000)
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(true)
+                .fair(true)
                 .build();
     }
 }

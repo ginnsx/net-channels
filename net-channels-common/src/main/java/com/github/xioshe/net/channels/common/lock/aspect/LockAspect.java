@@ -43,7 +43,7 @@ public class LockAspect {
                     .waitTime(getWaitTime(withLock))
                     .leaseTime(getLeaseTime(withLock))
                     .timeUnit(withLock.timeUnit())
-                    .fairLock(withLock.fairLock())
+                    .fair(withLock.fair())
                     .build();
         } catch (Exception e) {
             throw new LockException("Failed to parse lock info", e);

@@ -61,7 +61,7 @@ public class LockTemplate {
                 .waitTime(properties.getWaitTime())
                 .leaseTime(properties.getLeaseTime())
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(properties.isFairLock())
+                .fair(properties.isDefaultFair())
                 .build();
     }
 

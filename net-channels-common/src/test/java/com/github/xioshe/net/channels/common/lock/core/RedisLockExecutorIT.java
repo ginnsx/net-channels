@@ -31,7 +31,7 @@ class RedisLockExecutorIT extends LockExecutorContractTest {
                 .waitTime(200)
                 .leaseTime(0) // 自动续期
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(true)
+                .fair(true)
                 .build();
     }
 }

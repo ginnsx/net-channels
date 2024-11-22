@@ -40,7 +40,7 @@ public class RedisLockExecutor implements LockExecutor {
             );
             if (acquired) {
                 // 保证公平性缓存与锁一致，也避免 unlock() 提前删除缓存的问题
-                fairnessCache.put(lockInfo.getKey(), lockInfo.isFairLock());
+                fairnessCache.put(lockInfo.getKey(), lockInfo.isFair());
             }
             return acquired;
         } catch (InterruptedException e) {
@@ -54,13 +54,13 @@ public class RedisLockExecutor implements LockExecutor {
             if (existing != null) {
                 return existing;
             }
-            return lockInfo.isFairLock();
+            return lockInfo.isFair();
         });
 
         // 检查公平性设置是否一致
-        if (strictFair && existingFairness != lockInfo.isFairLock()) {
+        if (strictFair && existingFairness != lockInfo.isFair()) {
             log.warn("Lock fairness setting mismatch for key: {}. Existing: {}, Requested: {}",
-                    lockInfo.getKey(), existingFairness, lockInfo.isFairLock());
+                    lockInfo.getKey(), existingFairness, lockInfo.isFair());
             return true;
         }
         return false;
@@ -89,7 +89,7 @@ public class RedisLockExecutor implements LockExecutor {
 
     private RLock getLock(LockInfo lockInfo) {
         String key = lockPrefix + lockInfo.getKey();
-        return lockInfo.isFairLock()
+        return lockInfo.isFair()
                 ? redissonClient.getFairLock(key)
                 : redissonClient.getLock(key);
     }

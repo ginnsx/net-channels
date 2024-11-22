@@ -33,7 +33,7 @@ class LockTemplateTest {
     void setUp() {
         when(properties.getWaitTime()).thenReturn(1000L);
         when(properties.getLeaseTime()).thenReturn(5000L);
-        when(properties.isFairLock()).thenReturn(false);
+        when(properties.isDefaultFair()).thenReturn(false);
 
         lockTemplate = new LockTemplate(lockExecutor, properties);
     }
@@ -89,7 +89,7 @@ class LockTemplateTest {
                 .waitTime(2000)
                 .leaseTime(10000)
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(true)
+                .fair(true)
                 .build();
 
         when(lockExecutor.tryLock(any(LockInfo.class))).thenReturn(true);
@@ -102,7 +102,7 @@ class LockTemplateTest {
                 info.getKey().equals("custom-key") &&
                 info.getWaitTime() == 2000 &&
                 info.getLeaseTime() == 10000 &&
-                info.isFairLock()
+                info.isFair()
         ));
     }
 }

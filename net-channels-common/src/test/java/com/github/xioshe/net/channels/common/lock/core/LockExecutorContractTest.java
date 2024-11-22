@@ -97,7 +97,7 @@ public abstract class LockExecutorContractTest {
                 .waitTime(500)
                 .leaseTime(1000)
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .fairLock(true)
+                .fair(true)
                 .build();
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean acquired = new AtomicBoolean(false);
@@ -210,7 +210,7 @@ public abstract class LockExecutorContractTest {
         // when & then
         boolean firstAcquire = lockExecutor.tryLock(lockInfo, true);
         assertTrue(firstAcquire, "First acquire should succeed");
-        lockInfo.setFairLock(false);
+        lockInfo.setFair(false);
         boolean secondAcquire = lockExecutor.tryLock(lockInfo, true);
         assertFalse(secondAcquire, "Second acquire should failed for different fairness");
 
